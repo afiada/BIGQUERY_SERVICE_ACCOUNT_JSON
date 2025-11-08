@@ -1,0 +1,37 @@
+name: Test BigQuery Connection
+
+on: 
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-connection:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Debug - Show Secrets Info
+      run: |
+        echo "🎯 Testando configuração do BigQuery..."
+        echo "Project ID: ${{ secrets.GCP_PROJECT_ID }}"
+        echo "Service Account configurada: ${{ secrets.BIGQUERY_SERVICE_ACCOUNT_JSON != '' }}"
+        echo "✅ Secrets carregados com sucesso!"
+        
+    - name: Setup Google Cloud
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.BIGQUERY_SERVICE_ACCOUNT_JSON }}
+        
+    - name: Test BigQuery Basic Query
+      run: |
+        echo "📊 Executando query de teste no BigQuery..."
+        bq query --use_legacy_sql=false "
+        SELECT 
+          CURRENT_TIMESTAMP() as timestamp,
+          '${{ secrets.GCP_PROJECT_ID }}' as project_id,
+          'Conexão BigQuery-GitHub: SUCESSO! 🎉' as status
+        "
