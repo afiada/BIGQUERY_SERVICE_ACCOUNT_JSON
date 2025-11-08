@@ -1,28 +1,27 @@
-name: Test BigQuery Connection
+name: BigQuery Test
 
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - main   # ou a branch que você quiser disparar o workflow
 
 jobs:
-  test-connection:
+  run-query:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Test Secrets
-      run: |
-        echo "🔍 Testing secrets..."
-        echo "Project ID: ${{ secrets.GCP_PROJECT_ID }}"
-        echo "JSON exists: ${{ secrets.BIGQUERY_SERVICE_ACCOUNT_JSON != '' }}"
-        
-    - name: Setup Google Cloud
-      uses: google-github-actions/setup-gcloud@v1
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
-        service_account_key: ${{ secrets.BIGQUERY_SERVICE_ACCOUNT_JSON }}
-        
-    - name: Test BigQuery
-      run: |
-        echo "🚀 Testing BigQuery connection..."
-        bq query --use_legacy_sql=false "SELECT CURRENT_TIMESTAMP() as current_time"
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Run a BigQuery command
+        uses: google-github-actions/run@v2
+        with:
+          project_id: primeiroprojeto-406719
+          command: |
+            bq query --use_legacy_sql=false \
+            'SELECT CURRENT_TIMESTAMP() AS current_time;'
