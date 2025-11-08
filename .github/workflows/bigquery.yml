@@ -1,4 +1,4 @@
-name: BigQuery - run bq query
+name: BigQuery - test query
 
 on:
   push:
@@ -9,16 +9,21 @@ jobs:
   run-bq:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: 'read'
+      id-token: 'write'   # necessário para autenticação
+
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
+          token_format: 'access_token'
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-      - name: Install bq (Cloud SDK)
+      - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: primeiroprojeto-406719
@@ -26,5 +31,6 @@ jobs:
 
       - name: Run BigQuery SQL
         run: |
-          # exemplo simples: consulta de teste
-          bq query --nouse_legacy_sql "SELECT CURRENT_TIMESTAMP() as current_time, 'ok' as status;"
+          echo "Running BigQuery test query..."
+          bq query --nouse_legacy_sql \
+            "SELECT CURRENT_TIMESTAMP() AS current_time, 'Thaís Farias 🌸' AS user"
