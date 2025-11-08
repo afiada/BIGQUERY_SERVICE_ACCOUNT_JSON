@@ -1,12 +1,28 @@
-name: Simple BigQuery Test
+name: Test BigQuery Connection
 
 on: [workflow_dispatch]
 
 jobs:
-  simple-test:
+  test-connection:
     runs-on: ubuntu-latest
+    
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
     - name: Test Secrets
       run: |
-        echo "GCP Project: ${{ secrets.GCP_PROJECT_ID }}"
+        echo "🔍 Testing secrets..."
+        echo "Project ID: ${{ secrets.GCP_PROJECT_ID }}"
         echo "JSON exists: ${{ secrets.BIGQUERY_SERVICE_ACCOUNT_JSON != '' }}"
+        
+    - name: Setup Google Cloud
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.BIGQUERY_SERVICE_ACCOUNT_JSON }}
+        
+    - name: Test BigQuery
+      run: |
+        echo "🚀 Testing BigQuery connection..."
+        bq query --use_legacy_sql=false "SELECT CURRENT_TIMESTAMP() as current_time"
